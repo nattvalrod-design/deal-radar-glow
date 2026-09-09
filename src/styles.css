@@ -42,18 +42,18 @@
 
 :root {
   --radius: 0.625rem;
-  --ink: oklch(0.17 0.017 250);
-  --panel: oklch(0.22 0.018 250);
-  --panel2: oklch(0.26 0.019 250);
-  --line: oklch(0.32 0.02 250);
-  --brand: oklch(0.68 0.2 41);
-  --accent: oklch(0.79 0.14 205);
+  --ink: oklch(0.97 0.012 210);
+  --panel: oklch(1 0 0);
+  --panel2: oklch(0.95 0.025 205);
+  --line: oklch(0.86 0.025 220);
+  --brand: oklch(0.72 0.13 190);
+  --accent: oklch(0.34 0.095 247);
   --go: oklch(0.72 0.18 148);
   --warn: oklch(0.79 0.16 76);
   --stop: oklch(0.64 0.22 27);
   --background: var(--ink);
-  --foreground: oklch(0.99 0 0);
-  --muted-foreground: oklch(0.72 0.01 250);
+  --foreground: oklch(0.25 0.075 250);
+  --muted-foreground: oklch(0.52 0.045 245);
 }
 
 @layer base {
