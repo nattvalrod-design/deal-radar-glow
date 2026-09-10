@@ -13,6 +13,30 @@ export const ESTADOS: Estado[] = [
   "Perdida",
 ];
 
+export type Segmento = "MV" | "PA" | "CS";
+
+export const SEGMENTOS: Segmento[] = ["MV", "PA", "CS"];
+
+export const SEGMENTO_LABEL: Record<Segmento, string> = {
+  MV: "MV · Media tensión",
+  PA: "PA · Protección y automatización",
+  CS: "CS · Servicios",
+};
+
+export type EstadoInspektor = "VIGENTE" | "POR VENCER" | "VENCIDO";
+
+export const ESTADOS_INSPEKTOR: EstadoInspektor[] = [
+  "VIGENTE",
+  "POR VENCER",
+  "VENCIDO",
+];
+
+export const COLOR_INSPEKTOR: Record<EstadoInspektor, string> = {
+  VIGENTE: "bg-go/15 text-go",
+  "POR VENCER": "bg-warn/15 text-warn",
+  VENCIDO: "bg-stop/15 text-stop",
+};
+
 export type Actividad = {
   id: string;
   oportunidadId: string;
@@ -25,7 +49,10 @@ export type Oportunidad = {
   id: string; // Opportunity ID, p.ej. OPP-2041
   nombre: string;
   cliente: string;
-  responsable: string;
+  comercial: string;
+  tecnico: string;
+  segmento: Segmento;
+  inspektor: EstadoInspektor;
   estado: Estado;
   fechaCierre: string; // ISO date
   valor: number;
@@ -77,7 +104,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2041",
     nombre: "Mantenimiento preventivo anual",
     cliente: "Empresa A",
-    responsable: "L. Ferrer",
+    comercial: "L. Ferrer",
+    tecnico: "J. Salas",
+    segmento: "CS",
+    inspektor: "VIGENTE",
     estado: "Ganada",
     fechaCierre: fechaRelativa(-3),
     valor: 1_200_000,
@@ -86,7 +116,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2038",
     nombre: "Modernización de media tensión",
     cliente: "Empresa B",
-    responsable: "M. Duarte",
+    comercial: "M. Duarte",
+    tecnico: "R. Peña",
+    segmento: "MV",
+    inspektor: "POR VENCER",
     estado: "Negociación",
     fechaCierre: fechaRelativa(5),
     valor: 840_000,
@@ -95,7 +128,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2035",
     nombre: "Pruebas y calibración de relés",
     cliente: "Empresa C",
-    responsable: "A. Reyes",
+    comercial: "A. Reyes",
+    tecnico: "D. Ortiz",
+    segmento: "PA",
+    inspektor: "VENCIDO",
     estado: "Propuesta",
     fechaCierre: fechaRelativa(2),
     valor: 320_000,
@@ -104,7 +140,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2032",
     nombre: "Mantenimiento de celdas eléctricas",
     cliente: "Empresa D",
-    responsable: "L. Ferrer",
+    comercial: "L. Ferrer",
+    tecnico: "J. Salas",
+    segmento: "MV",
+    inspektor: "VIGENTE",
     estado: "Negociación",
     fechaCierre: fechaRelativa(24),
     valor: 1_900_000,
@@ -113,7 +152,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2029",
     nombre: "Suministro de relés de protección",
     cliente: "Empresa E",
-    responsable: "M. Duarte",
+    comercial: "M. Duarte",
+    tecnico: "D. Ortiz",
+    segmento: "PA",
+    inspektor: "POR VENCER",
     estado: "Calificación",
     fechaCierre: fechaRelativa(6),
     valor: 410_000,
@@ -122,7 +164,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2024",
     nombre: "Adecuación de red de media tensión",
     cliente: "Empresa F",
-    responsable: "A. Reyes",
+    comercial: "A. Reyes",
+    tecnico: "R. Peña",
+    segmento: "MV",
+    inspektor: "VENCIDO",
     estado: "Propuesta",
     fechaCierre: fechaRelativa(-6),
     valor: 560_000,
@@ -131,7 +176,10 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     id: "OPP-2019",
     nombre: "Mantenimiento correctivo de subestación",
     cliente: "Empresa G",
-    responsable: "C. Vidal",
+    comercial: "C. Vidal",
+    tecnico: "S. Mora",
+    segmento: "CS",
+    inspektor: "VIGENTE",
     estado: "Negociación",
     fechaCierre: fechaRelativa(38),
     valor: 730_000,
