@@ -242,16 +242,52 @@ function Index() {
             Esta semana
           </button>
           <select
-            value={fResponsable}
-            onChange={(e) => setFResponsable(e.target.value)}
+            value={fComercial}
+            onChange={(e) => setFComercial(e.target.value)}
             className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
           >
-            {responsables.map((r) => (
+            {comerciales.map((r) => (
               <option key={r} value={r}>
-                {r === "Todos" ? "Responsable: Todos" : r}
+                {r === "Todos" ? "Comercial: Todos" : r}
               </option>
             ))}
           </select>
+          <select
+            value={fTecnico}
+            onChange={(e) => setFTecnico(e.target.value)}
+            className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
+          >
+            {tecnicos.map((r) => (
+              <option key={r} value={r}>
+                {r === "Todos" ? "Técnico: Todos" : r}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fSegmento}
+            onChange={(e) => setFSegmento(e.target.value as Segmento | "Todos")}
+            className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
+          >
+            <option value="Todos">Segmento: Todos</option>
+            {SEGMENTOS.map((s) => (
+              <option key={s} value={s}>
+                {SEGMENTO_LABEL[s]}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fInspektor}
+            onChange={(e) => setFInspektor(e.target.value as EstadoInspektor | "Todos")}
+            className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
+          >
+            <option value="Todos">Inspektor: Todos</option>
+            {ESTADOS_INSPEKTOR.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+
           <button
             onClick={() => setSoloGrandes((v) => !v)}
             className={`rounded-full border px-4 py-1.5 text-sm ${
