@@ -317,7 +317,11 @@ function Index() {
                     <th className="px-5 py-3 text-left font-medium">ID</th>
                     <th className="px-3 py-3 text-left font-medium">Oportunidad</th>
                     <th className="px-3 py-3 text-left font-medium">Cliente</th>
-                    <th className="px-3 py-3 text-left font-medium">Responsable</th>
+                    <th className="px-3 py-3 text-left font-medium">Comercial</th>
+                    <th className="px-3 py-3 text-left font-medium">Técnico</th>
+                    <th className="px-3 py-3 text-left font-medium">Segmento</th>
+                    <th className="px-3 py-3 text-left font-medium">Inspektor</th>
+
                     <th className="px-3 py-3 text-left font-medium">Estado</th>
                     <th className="px-3 py-3 text-left font-medium">Cierre</th>
                     <th className="px-5 py-3 text-right font-medium">Valor</th>
