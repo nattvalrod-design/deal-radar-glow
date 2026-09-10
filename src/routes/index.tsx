@@ -69,12 +69,19 @@ function Index() {
   const [abrirForm, setAbrirForm] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [fEstado, setFEstado] = useState<Estado | "Todos">("Todos");
-  const [fResponsable, setFResponsable] = useState("Todos");
+  const [fComercial, setFComercial] = useState("Todos");
+  const [fTecnico, setFTecnico] = useState("Todos");
+  const [fSegmento, setFSegmento] = useState<Segmento | "Todos">("Todos");
+  const [fInspektor, setFInspektor] = useState<EstadoInspektor | "Todos">("Todos");
   const [soloSemana, setSoloSemana] = useState(false);
   const [soloGrandes, setSoloGrandes] = useState(false);
 
-  const responsables = useMemo(
-    () => ["Todos", ...Array.from(new Set(oportunidades.map((o) => o.responsable)))],
+  const comerciales = useMemo(
+    () => ["Todos", ...Array.from(new Set(oportunidades.map((o) => o.comercial)))],
+    [oportunidades],
+  );
+  const tecnicos = useMemo(
+    () => ["Todos", ...Array.from(new Set(oportunidades.map((o) => o.tecnico)))],
     [oportunidades],
   );
 
@@ -85,21 +92,35 @@ function Index() {
           const q = busqueda.trim().toLowerCase();
           if (
             q &&
-            ![o.id, o.nombre, o.cliente, o.responsable].some((v) =>
+            ![o.id, o.nombre, o.cliente, o.comercial, o.tecnico].some((v) =>
               v.toLowerCase().includes(q),
             )
           )
             return false;
           if (fEstado !== "Todos" && o.estado !== fEstado) return false;
-          if (fResponsable !== "Todos" && o.responsable !== fResponsable) return false;
+          if (fComercial !== "Todos" && o.comercial !== fComercial) return false;
+          if (fTecnico !== "Todos" && o.tecnico !== fTecnico) return false;
+          if (fSegmento !== "Todos" && o.segmento !== fSegmento) return false;
+          if (fInspektor !== "Todos" && o.inspektor !== fInspektor) return false;
           const d = diasRestantes(o.fechaCierre);
           if (soloSemana && (d < 0 || d > 7)) return false;
           if (soloGrandes && o.valor <= 500_000) return false;
           return true;
         })
         .sort((a, b) => a.fechaCierre.localeCompare(b.fechaCierre)),
-    [oportunidades, busqueda, fEstado, fResponsable, soloSemana, soloGrandes],
+    [
+      oportunidades,
+      busqueda,
+      fEstado,
+      fComercial,
+      fTecnico,
+      fSegmento,
+      fInspektor,
+      soloSemana,
+      soloGrandes,
+    ],
   );
+
 
   const activas = oportunidades.filter(
     (o) => o.estado !== "Ganada" && o.estado !== "Perdida",
