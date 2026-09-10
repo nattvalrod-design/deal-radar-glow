@@ -6,8 +6,8 @@ import {
   type Oportunidad,
 } from "./opportunities";
 
-const KEY_OPS = "ofertas.oportunidades.v2";
-const KEY_ACT = "ofertas.actividades.v2";
+const KEY_OPS = "ofertas.oportunidades.v3";
+const KEY_ACT = "ofertas.actividades.v3";
 
 function leer<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;

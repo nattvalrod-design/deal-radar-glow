@@ -397,7 +397,7 @@ function Index() {
                   })}
                   {filtradas.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">
+                      <td colSpan={10} className="px-5 py-10 text-center text-muted-foreground">
                         No hay oportunidades con estos filtros.
                       </td>
                     </tr>
