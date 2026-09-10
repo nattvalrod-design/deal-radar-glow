@@ -345,7 +345,25 @@ function Index() {
                         </td>
                         <td className="px-3 py-4 font-medium">{o.nombre}</td>
                         <td className="px-3 py-4 text-muted-foreground">{o.cliente}</td>
-                        <td className="px-3 py-4 text-muted-foreground">{o.responsable}</td>
+                        <td className="px-3 py-4 text-muted-foreground">{o.comercial}</td>
+                        <td className="px-3 py-4 text-muted-foreground">{o.tecnico}</td>
+                        <td className="px-3 py-4">
+                          <span
+                            className="inline-flex rounded-md bg-brand/15 px-2 py-1 font-display text-xs font-semibold tracking-wide text-brand"
+                            title={SEGMENTO_LABEL[o.segmento]}
+                          >
+                            {o.segmento}
+                          </span>
+                        </td>
+                        <td className="px-3 py-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${COLOR_INSPEKTOR[o.inspektor]}`}
+                          >
+                            <span className="size-1.5 rounded-full bg-current"></span>
+                            {o.inspektor}
+                          </span>
+                        </td>
+
                         <td className="px-3 py-4">
                           <span
                             className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${COLOR_ESTADO[o.estado]}`}
