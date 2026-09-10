@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { ESTADOS, type Estado, type Oportunidad } from "@/lib/opportunities";
+import {
+  ESTADOS,
+  ESTADOS_INSPEKTOR,
+  SEGMENTOS,
+  SEGMENTO_LABEL,
+  type Estado,
+  type EstadoInspektor,
+  type Oportunidad,
+  type Segmento,
+} from "@/lib/opportunities";
 
 export function NuevaOportunidad({
   onGuardar,
@@ -12,7 +21,10 @@ export function NuevaOportunidad({
     id: "",
     nombre: "",
     cliente: "",
-    responsable: "",
+    comercial: "",
+    tecnico: "",
+    segmento: "MV" as Segmento,
+    inspektor: "VIGENTE" as EstadoInspektor,
     estado: "Calificación" as Estado,
     fechaCierre: new Date().toISOString().slice(0, 10),
     valor: "",
@@ -29,7 +41,10 @@ export function NuevaOportunidad({
       id: form.id.trim(),
       nombre: form.nombre.trim(),
       cliente: form.cliente.trim(),
-      responsable: form.responsable.trim() || "Sin asignar",
+      comercial: form.comercial.trim() || "Sin asignar",
+      tecnico: form.tecnico.trim() || "Sin asignar",
+      segmento: form.segmento,
+      inspektor: form.inspektor,
       estado: form.estado,
       fechaCierre: form.fechaCierre,
       valor: Number(form.valor) || 0,
@@ -76,12 +91,50 @@ export function NuevaOportunidad({
             />
           </label>
           <label className="space-y-1.5">
-            <span className={etiqueta}>Responsable</span>
+            <span className={etiqueta}>Comercial</span>
             <input
               className={campo}
-              value={form.responsable}
-              onChange={(e) => setForm({ ...form, responsable: e.target.value })}
+              value={form.comercial}
+              onChange={(e) => setForm({ ...form, comercial: e.target.value })}
             />
+          </label>
+          <label className="space-y-1.5">
+            <span className={etiqueta}>Técnico</span>
+            <input
+              className={campo}
+              value={form.tecnico}
+              onChange={(e) => setForm({ ...form, tecnico: e.target.value })}
+            />
+          </label>
+          <label className="space-y-1.5">
+            <span className={etiqueta}>Segmento de negocio</span>
+            <select
+              className={campo}
+              value={form.segmento}
+              onChange={(e) => setForm({ ...form, segmento: e.target.value as Segmento })}
+            >
+              {SEGMENTOS.map((s) => (
+                <option key={s} value={s} className="bg-panel">
+                  {SEGMENTO_LABEL[s]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-1.5">
+            <span className={etiqueta}>Estado Inspektor</span>
+            <select
+              className={campo}
+              value={form.inspektor}
+              onChange={(e) =>
+                setForm({ ...form, inspektor: e.target.value as EstadoInspektor })
+              }
+            >
+              {ESTADOS_INSPEKTOR.map((s) => (
+                <option key={s} value={s} className="bg-panel">
+                  {s}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="space-y-1.5">
             <span className={etiqueta}>Estado</span>

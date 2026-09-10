@@ -4,15 +4,22 @@ import { NuevaOportunidad } from "@/components/NuevaOportunidad";
 import { useOfertas } from "@/lib/useOfertas";
 import { predecirCierre } from "@/lib/ia";
 import {
+  COLOR_INSPEKTOR,
   ESTADOS,
+  ESTADOS_INSPEKTOR,
+  SEGMENTOS,
+  SEGMENTO_LABEL,
   SEMAFORO_LABEL,
   diasRestantes,
   formatoFecha,
   formatoMoneda,
   semaforo,
   type Estado,
+  type EstadoInspektor,
+  type Segmento,
   type Semaforo,
 } from "@/lib/opportunities";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -62,12 +69,19 @@ function Index() {
   const [abrirForm, setAbrirForm] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [fEstado, setFEstado] = useState<Estado | "Todos">("Todos");
-  const [fResponsable, setFResponsable] = useState("Todos");
+  const [fComercial, setFComercial] = useState("Todos");
+  const [fTecnico, setFTecnico] = useState("Todos");
+  const [fSegmento, setFSegmento] = useState<Segmento | "Todos">("Todos");
+  const [fInspektor, setFInspektor] = useState<EstadoInspektor | "Todos">("Todos");
   const [soloSemana, setSoloSemana] = useState(false);
   const [soloGrandes, setSoloGrandes] = useState(false);
 
-  const responsables = useMemo(
-    () => ["Todos", ...Array.from(new Set(oportunidades.map((o) => o.responsable)))],
+  const comerciales = useMemo(
+    () => ["Todos", ...Array.from(new Set(oportunidades.map((o) => o.comercial)))],
+    [oportunidades],
+  );
+  const tecnicos = useMemo(
+    () => ["Todos", ...Array.from(new Set(oportunidades.map((o) => o.tecnico)))],
     [oportunidades],
   );
 
@@ -78,21 +92,35 @@ function Index() {
           const q = busqueda.trim().toLowerCase();
           if (
             q &&
-            ![o.id, o.nombre, o.cliente, o.responsable].some((v) =>
+            ![o.id, o.nombre, o.cliente, o.comercial, o.tecnico].some((v) =>
               v.toLowerCase().includes(q),
             )
           )
             return false;
           if (fEstado !== "Todos" && o.estado !== fEstado) return false;
-          if (fResponsable !== "Todos" && o.responsable !== fResponsable) return false;
+          if (fComercial !== "Todos" && o.comercial !== fComercial) return false;
+          if (fTecnico !== "Todos" && o.tecnico !== fTecnico) return false;
+          if (fSegmento !== "Todos" && o.segmento !== fSegmento) return false;
+          if (fInspektor !== "Todos" && o.inspektor !== fInspektor) return false;
           const d = diasRestantes(o.fechaCierre);
           if (soloSemana && (d < 0 || d > 7)) return false;
           if (soloGrandes && o.valor <= 500_000) return false;
           return true;
         })
         .sort((a, b) => a.fechaCierre.localeCompare(b.fechaCierre)),
-    [oportunidades, busqueda, fEstado, fResponsable, soloSemana, soloGrandes],
+    [
+      oportunidades,
+      busqueda,
+      fEstado,
+      fComercial,
+      fTecnico,
+      fSegmento,
+      fInspektor,
+      soloSemana,
+      soloGrandes,
+    ],
   );
+
 
   const activas = oportunidades.filter(
     (o) => o.estado !== "Ganada" && o.estado !== "Perdida",
@@ -214,16 +242,52 @@ function Index() {
             Esta semana
           </button>
           <select
-            value={fResponsable}
-            onChange={(e) => setFResponsable(e.target.value)}
+            value={fComercial}
+            onChange={(e) => setFComercial(e.target.value)}
             className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
           >
-            {responsables.map((r) => (
+            {comerciales.map((r) => (
               <option key={r} value={r}>
-                {r === "Todos" ? "Responsable: Todos" : r}
+                {r === "Todos" ? "Comercial: Todos" : r}
               </option>
             ))}
           </select>
+          <select
+            value={fTecnico}
+            onChange={(e) => setFTecnico(e.target.value)}
+            className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
+          >
+            {tecnicos.map((r) => (
+              <option key={r} value={r}>
+                {r === "Todos" ? "Técnico: Todos" : r}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fSegmento}
+            onChange={(e) => setFSegmento(e.target.value as Segmento | "Todos")}
+            className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
+          >
+            <option value="Todos">Segmento: Todos</option>
+            {SEGMENTOS.map((s) => (
+              <option key={s} value={s}>
+                {SEGMENTO_LABEL[s]}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fInspektor}
+            onChange={(e) => setFInspektor(e.target.value as EstadoInspektor | "Todos")}
+            className="rounded-full border border-line bg-panel px-4 py-1.5 text-sm text-muted-foreground outline-none hover:border-accent/40"
+          >
+            <option value="Todos">Inspektor: Todos</option>
+            {ESTADOS_INSPEKTOR.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+
           <button
             onClick={() => setSoloGrandes((v) => !v)}
             className={`rounded-full border px-4 py-1.5 text-sm ${
@@ -253,7 +317,11 @@ function Index() {
                     <th className="px-5 py-3 text-left font-medium">ID</th>
                     <th className="px-3 py-3 text-left font-medium">Oportunidad</th>
                     <th className="px-3 py-3 text-left font-medium">Cliente</th>
-                    <th className="px-3 py-3 text-left font-medium">Responsable</th>
+                    <th className="px-3 py-3 text-left font-medium">Comercial</th>
+                    <th className="px-3 py-3 text-left font-medium">Técnico</th>
+                    <th className="px-3 py-3 text-left font-medium">Segmento</th>
+                    <th className="px-3 py-3 text-left font-medium">Inspektor</th>
+
                     <th className="px-3 py-3 text-left font-medium">Estado</th>
                     <th className="px-3 py-3 text-left font-medium">Cierre</th>
                     <th className="px-5 py-3 text-right font-medium">Valor</th>
@@ -277,7 +345,25 @@ function Index() {
                         </td>
                         <td className="px-3 py-4 font-medium">{o.nombre}</td>
                         <td className="px-3 py-4 text-muted-foreground">{o.cliente}</td>
-                        <td className="px-3 py-4 text-muted-foreground">{o.responsable}</td>
+                        <td className="px-3 py-4 text-muted-foreground">{o.comercial}</td>
+                        <td className="px-3 py-4 text-muted-foreground">{o.tecnico}</td>
+                        <td className="px-3 py-4">
+                          <span
+                            className="inline-flex rounded-md bg-brand/15 px-2 py-1 font-display text-xs font-semibold tracking-wide text-brand"
+                            title={SEGMENTO_LABEL[o.segmento]}
+                          >
+                            {o.segmento}
+                          </span>
+                        </td>
+                        <td className="px-3 py-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${COLOR_INSPEKTOR[o.inspektor]}`}
+                          >
+                            <span className="size-1.5 rounded-full bg-current"></span>
+                            {o.inspektor}
+                          </span>
+                        </td>
+
                         <td className="px-3 py-4">
                           <span
                             className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${COLOR_ESTADO[o.estado]}`}
@@ -311,7 +397,7 @@ function Index() {
                   })}
                   {filtradas.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">
+                      <td colSpan={10} className="px-5 py-10 text-center text-muted-foreground">
                         No hay oportunidades con estos filtros.
                       </td>
                     </tr>
