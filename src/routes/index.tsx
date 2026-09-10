@@ -4,15 +4,22 @@ import { NuevaOportunidad } from "@/components/NuevaOportunidad";
 import { useOfertas } from "@/lib/useOfertas";
 import { predecirCierre } from "@/lib/ia";
 import {
+  COLOR_INSPEKTOR,
   ESTADOS,
+  ESTADOS_INSPEKTOR,
+  SEGMENTOS,
+  SEGMENTO_LABEL,
   SEMAFORO_LABEL,
   diasRestantes,
   formatoFecha,
   formatoMoneda,
   semaforo,
   type Estado,
+  type EstadoInspektor,
+  type Segmento,
   type Semaforo,
 } from "@/lib/opportunities";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
