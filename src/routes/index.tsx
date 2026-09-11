@@ -24,13 +24,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vanta Pulse — Seguimiento de ofertas comerciales" },
+      { title: "OfferPulse — Seguimiento de ofertas comerciales" },
       {
         name: "description",
         content:
           "Panel de seguimiento de ofertas comerciales: indicadores, alertas de vencimiento, filtros, actividades pendientes y semáforo de riesgo.",
       },
-      { property: "og:title", content: "Vanta Pulse — Seguimiento de ofertas comerciales" },
+      { property: "og:title", content: "OfferPulse — Seguimiento de ofertas comerciales" },
       {
         property: "og:description",
         content:
@@ -61,6 +61,7 @@ function Index() {
   const {
     oportunidades,
     actividades,
+    listo,
     agregarOportunidad,
     eliminarOportunidad,
     alternarActividad,
@@ -92,7 +93,7 @@ function Index() {
           const q = busqueda.trim().toLowerCase();
           if (
             q &&
-            ![o.id, o.nombre, o.cliente, o.comercial, o.tecnico].some((v) =>
+            ![o.id, o.nombre, o.cliente, o.comercial, o.tecnico, o.vendedor].some((v) =>
               v.toLowerCase().includes(q),
             )
           )
@@ -125,18 +126,63 @@ function Index() {
   const activas = oportunidades.filter(
     (o) => o.estado !== "Ganada" && o.estado !== "Perdida",
   );
-  const pipelineTotal = activas.reduce((s, o) => s + o.valor, 0);
+  const anioActual = new Date().getFullYear();
+  const mesActual = new Date().getMonth();
+  const pipelineAnio = activas
+    .filter((o) => new Date(o.fechaCierre + "T00:00:00").getFullYear() === anioActual)
+    .reduce((s, o) => s + o.valor, 0);
   const enNegociacion = activas.filter((o) => o.estado === "Negociación").length;
   const alertas = activas
     .filter((o) => diasRestantes(o.fechaCierre) <= 7)
     .sort((a, b) => diasRestantes(a.fechaCierre) - diasRestantes(b.fechaCierre));
   const criticas = alertas.filter((o) => diasRestantes(o.fechaCierre) < 0).length;
-  const cierre30 = activas
+  const cierreMes = activas
     .filter((o) => {
-      const d = diasRestantes(o.fechaCierre);
-      return d >= 0 && d <= 30;
+      const f = new Date(o.fechaCierre + "T00:00:00");
+      return f.getFullYear() === anioActual && f.getMonth() === mesActual;
     })
     .reduce((s, o) => s + o.valor, 0);
+  const ofertasMes = activas.filter((o) => {
+    const f = new Date(o.fechaCierre + "T00:00:00");
+    return f.getFullYear() === anioActual && f.getMonth() === mesActual;
+  }).length;
+
+  // Ganadas vs pipeline estimado, últimos 6 meses
+  const meses = Array.from({ length: 6 }, (_, k) => {
+    const base = new Date(anioActual, mesActual - (5 - k), 1);
+    const ganadas = oportunidades
+      .filter((o) => {
+        const f = new Date(o.fechaCierre + "T00:00:00");
+        return (
+          o.estado === "Ganada" &&
+          f.getFullYear() === base.getFullYear() &&
+          f.getMonth() === base.getMonth()
+        );
+      })
+      .reduce((s, o) => s + o.valor, 0);
+    const estimado = oportunidades
+      .filter((o) => {
+        const f = new Date(o.fechaCierre + "T00:00:00");
+        return (
+          o.estado !== "Ganada" &&
+          o.estado !== "Perdida" &&
+          f.getFullYear() === base.getFullYear() &&
+          f.getMonth() === base.getMonth()
+        );
+      })
+      .reduce((s, o) => s + o.valor, 0);
+    return {
+      etiqueta: base.toLocaleDateString("es-ES", { month: "short" }),
+      ganadas,
+      estimado,
+    };
+  });
+  const maxMes = Math.max(1, ...meses.map((m) => Math.max(m.ganadas, m.estimado)));
+  const totalGanadas = meses.reduce((s, m) => s + m.ganadas, 0);
+  const totalEstimado = meses.reduce((s, m) => s + m.estimado, 0);
+  const tasaConversion = Math.round(
+    (totalGanadas / Math.max(1, totalGanadas + totalEstimado)) * 100,
+  );
 
   const conteoSemaforo = (s: Semaforo) =>
     oportunidades.filter((o) => semaforo(o) === s).length;
@@ -150,17 +196,19 @@ function Index() {
 
   const pendientes = actividades.filter((a) => !a.hecha);
 
+  if (!listo) return <div className="min-h-screen bg-ink"></div>;
+
   return (
     <div className="min-h-screen bg-ink text-foreground selection:bg-brand selection:text-accent">
       <div className="mx-auto max-w-[1440px] px-6 py-7 lg:px-10">
         <header className="flex flex-wrap items-center justify-between gap-5 border-b border-line pb-6">
           <div className="flex items-center gap-4">
             <div className="grid size-11 rotate-[-6deg] place-items-center bg-accent font-display text-2xl font-bold text-panel">
-              V
+              O
             </div>
             <div>
               <h1 className="font-display text-2xl font-bold uppercase leading-none tracking-wide">
-                Vanta <span className="text-brand">Pulse</span>
+                Offer<span className="text-brand">Pulse</span>
               </h1>
               <p className="mt-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
                 Pipeline Command Deck
@@ -189,8 +237,8 @@ function Index() {
         <section className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Kpi
             barra="bg-brand"
-            titulo="Pipeline total"
-            valor={formatoMoneda(pipelineTotal)}
+            titulo={`Pipeline total ${anioActual}`}
+            valor={formatoMoneda(pipelineAnio)}
             pie={`${activas.length} ofertas abiertas`}
             pieClase="text-go"
           />
@@ -209,9 +257,9 @@ function Index() {
           />
           <Kpi
             barra="bg-go"
-            titulo="Cierre estimado"
-            valor={formatoMoneda(cierre30)}
-            pie="próximos 30 días"
+            titulo="Cierre estimado del mes"
+            valor={formatoMoneda(cierreMes)}
+            pie={`${ofertasMes} ofertas este mes`}
           />
         </section>
 
@@ -319,6 +367,7 @@ function Index() {
                     <th className="px-3 py-3 text-left font-medium">Cliente</th>
                     <th className="px-3 py-3 text-left font-medium">Comercial</th>
                     <th className="px-3 py-3 text-left font-medium">Técnico</th>
+                    <th className="px-3 py-3 text-left font-medium">Vendedor</th>
                     <th className="px-3 py-3 text-left font-medium">Segmento</th>
                     <th className="px-3 py-3 text-left font-medium">Inspektor</th>
 
@@ -347,6 +396,7 @@ function Index() {
                         <td className="px-3 py-4 text-muted-foreground">{o.cliente}</td>
                         <td className="px-3 py-4 text-muted-foreground">{o.comercial}</td>
                         <td className="px-3 py-4 text-muted-foreground">{o.tecnico}</td>
+                        <td className="px-3 py-4 text-muted-foreground">{o.vendedor}</td>
                         <td className="px-3 py-4">
                           <span
                             className="inline-flex rounded-md bg-brand/15 px-2 py-1 font-display text-xs font-semibold tracking-wide text-brand"
@@ -397,7 +447,7 @@ function Index() {
                   })}
                   {filtradas.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="px-5 py-10 text-center text-muted-foreground">
+                      <td colSpan={11} className="px-5 py-10 text-center text-muted-foreground">
                         No hay oportunidades con estos filtros.
                       </td>
                     </tr>
@@ -524,6 +574,48 @@ function Index() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-xl border border-line bg-panel p-5">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-lg font-semibold uppercase tracking-wide">
+              Ofertas ganadas vs pipeline estimado
+            </h2>
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <span className="size-2.5 rounded-sm bg-go"></span> Ganadas{" "}
+                <b className="text-foreground">{formatoMoneda(totalGanadas)}</b>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="size-2.5 rounded-sm bg-brand"></span> Estimado{" "}
+                <b className="text-foreground">{formatoMoneda(totalEstimado)}</b>
+              </span>
+              <span className="rounded-full bg-panel2 px-3 py-1">
+                Conversión {tasaConversion}%
+              </span>
+            </div>
+          </div>
+          <div className="flex h-52 items-end justify-between gap-4">
+            {meses.map((m) => (
+              <div key={m.etiqueta} className="flex flex-1 flex-col items-center gap-2">
+                <div className="flex h-full w-full items-end justify-center gap-1.5">
+                  <div
+                    className="bar-anim w-1/3 rounded-t-sm bg-go"
+                    style={{ height: `${Math.max(2, (m.ganadas / maxMes) * 100)}%` }}
+                    title={`Ganadas ${formatoMoneda(m.ganadas)}`}
+                  ></div>
+                  <div
+                    className="bar-anim w-1/3 rounded-t-sm bg-brand"
+                    style={{ height: `${Math.max(2, (m.estimado / maxMes) * 100)}%` }}
+                    title={`Estimado ${formatoMoneda(m.estimado)}`}
+                  ></div>
+                </div>
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {m.etiqueta}
+                </span>
+              </div>
+            ))}
           </div>
         </section>
 
