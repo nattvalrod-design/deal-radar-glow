@@ -51,6 +51,7 @@ export type Oportunidad = {
   cliente: string;
   comercial: string;
   tecnico: string;
+  vendedor: string;
   segmento: Segmento;
   inspektor: EstadoInspektor;
   estado: Estado;
@@ -106,6 +107,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa A",
     comercial: "L. Ferrer",
     tecnico: "J. Salas",
+    vendedor: "P. Cano",
     segmento: "CS",
     inspektor: "VIGENTE",
     estado: "Ganada",
@@ -118,6 +120,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa B",
     comercial: "M. Duarte",
     tecnico: "R. Peña",
+    vendedor: "N. Rivas",
     segmento: "MV",
     inspektor: "POR VENCER",
     estado: "Negociación",
@@ -130,6 +133,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa C",
     comercial: "A. Reyes",
     tecnico: "D. Ortiz",
+    vendedor: "T. Aguilar",
     segmento: "PA",
     inspektor: "VENCIDO",
     estado: "Propuesta",
@@ -142,6 +146,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa D",
     comercial: "L. Ferrer",
     tecnico: "J. Salas",
+    vendedor: "P. Cano",
     segmento: "MV",
     inspektor: "VIGENTE",
     estado: "Negociación",
@@ -154,6 +159,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa E",
     comercial: "M. Duarte",
     tecnico: "D. Ortiz",
+    vendedor: "N. Rivas",
     segmento: "PA",
     inspektor: "POR VENCER",
     estado: "Calificación",
@@ -166,6 +172,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa F",
     comercial: "A. Reyes",
     tecnico: "R. Peña",
+    vendedor: "T. Aguilar",
     segmento: "MV",
     inspektor: "VENCIDO",
     estado: "Propuesta",
@@ -178,6 +185,7 @@ export const OPORTUNIDADES_SEED: Oportunidad[] = [
     cliente: "Empresa G",
     comercial: "C. Vidal",
     tecnico: "S. Mora",
+    vendedor: "P. Cano",
     segmento: "CS",
     inspektor: "VIGENTE",
     estado: "Negociación",

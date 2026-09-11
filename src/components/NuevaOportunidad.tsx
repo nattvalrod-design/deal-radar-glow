@@ -23,6 +23,7 @@ export function NuevaOportunidad({
     cliente: "",
     comercial: "",
     tecnico: "",
+    vendedor: "",
     segmento: "MV" as Segmento,
     inspektor: "VIGENTE" as EstadoInspektor,
     estado: "Calificación" as Estado,
@@ -43,6 +44,7 @@ export function NuevaOportunidad({
       cliente: form.cliente.trim(),
       comercial: form.comercial.trim() || "Sin asignar",
       tecnico: form.tecnico.trim() || "Sin asignar",
+      vendedor: form.vendedor.trim() || "Sin asignar",
       segmento: form.segmento,
       inspektor: form.inspektor,
       estado: form.estado,
@@ -104,6 +106,14 @@ export function NuevaOportunidad({
               className={campo}
               value={form.tecnico}
               onChange={(e) => setForm({ ...form, tecnico: e.target.value })}
+            />
+          </label>
+          <label className="space-y-1.5">
+            <span className={etiqueta}>Vendedor</span>
+            <input
+              className={campo}
+              value={form.vendedor}
+              onChange={(e) => setForm({ ...form, vendedor: e.target.value })}
             />
           </label>
           <label className="space-y-1.5">
