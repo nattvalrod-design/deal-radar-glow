@@ -142,7 +142,7 @@ export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
       doc.setTextColor(255, 255, 255);
       vals.forEach((v, i) => {
         doc.text(String(v), x, y);
-        x += anchos[i];
+        x += anchos[i] ?? 0;
       });
     }
     y += 15;
