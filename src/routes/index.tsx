@@ -420,8 +420,17 @@ function Index() {
                     const s = semaforo(o);
                     const d = diasRestantes(o.fechaCierre);
                     const pred = predecirCierre(o);
+                    const critica =
+                      o.estado !== "Ganada" && o.estado !== "Perdida" && d < 7;
                     return (
-                      <tr key={o.id} className="group hover:bg-panel2/60">
+                      <tr
+                        key={o.id}
+                        className={`group ${
+                          critica
+                            ? "bg-stop/10 hover:bg-stop/15"
+                            : "hover:bg-panel2/60"
+                        }`}
+                      >
                         <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
                           <span className="flex items-center gap-2">
                             <span
