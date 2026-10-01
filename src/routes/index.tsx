@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { NuevaOportunidad } from "@/components/NuevaOportunidad";
 import { useOfertas } from "@/lib/useOfertas";
 import { predecirCierre } from "@/lib/ia";
@@ -195,6 +196,44 @@ function Index() {
   const maxEtapa = Math.max(1, ...porEtapa.map((p) => p.total));
 
   const pendientes = actividades.filter((a) => !a.hecha);
+
+  // Panel por vendedor: vigentes / por vencer / vencidas + pipeline personal
+  const panelVendedores = useMemo(() => {
+    const nombres = Array.from(new Set(oportunidades.map((o) => o.vendedor)));
+    return nombres.map((v) => {
+      const mias = oportunidades.filter((o) => o.vendedor === v);
+      const abiertas = mias.filter((o) => o.estado !== "Ganada" && o.estado !== "Perdida");
+      const vigentes = abiertas.filter((o) => diasRestantes(o.fechaCierre) > 7);
+      const porVencer = abiertas.filter((o) => {
+        const d = diasRestantes(o.fechaCierre);
+        return d >= 0 && d <= 7;
+      });
+      const vencidas = abiertas.filter((o) => diasRestantes(o.fechaCierre) < 0);
+      const ganado = mias
+        .filter((o) => o.estado === "Ganada")
+        .reduce((s, o) => s + o.valor, 0);
+      const estimado = abiertas.reduce((s, o) => s + o.valor, 0);
+      return { nombre: v, vigentes, porVencer, vencidas, ganado, estimado };
+    });
+  }, [oportunidades]);
+
+  // Notificaciones automáticas al responsable por ofertas que vencen en <7 días
+  const notificadas = useRef(false);
+  useEffect(() => {
+    if (!listo || notificadas.current) return;
+    notificadas.current = true;
+    alertas.forEach((o, i) => {
+      const d = diasRestantes(o.fechaCierre);
+      const detalle =
+        d < 0
+          ? `Vencida hace ${Math.abs(d)} días · Responsable: ${o.comercial}`
+          : `Vence en ${d} días · Responsable: ${o.comercial}`;
+      setTimeout(() => {
+        if (d < 0) toast.error(`${o.id} · ${o.nombre}`, { description: detalle });
+        else toast.warning(`${o.id} · ${o.nombre}`, { description: detalle });
+      }, 400 + i * 600);
+    });
+  }, [listo, alertas]);
 
   if (!listo) return <div className="min-h-screen bg-ink"></div>;
 
