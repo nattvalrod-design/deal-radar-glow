@@ -667,6 +667,93 @@ function Index() {
           </div>
         </section>
 
+        <section className="mt-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold uppercase tracking-wide">
+              Panel por vendedor
+            </h2>
+            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              vigentes · por vencer · vencidas
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {panelVendedores.map((v) => {
+              const maxBarra = Math.max(1, v.ganado, v.estimado);
+              return (
+                <div
+                  key={v.nombre}
+                  className="rounded-xl border border-line bg-panel p-5"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-display text-base font-semibold uppercase tracking-wide">
+                      {v.nombre}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {v.vigentes.length + v.porVencer.length + v.vencidas.length} abiertas
+                    </span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-lg bg-go/10 py-2">
+                      <p className="font-display text-xl font-bold text-go">
+                        {v.vigentes.length}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Vigentes
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-warn/10 py-2">
+                      <p className="font-display text-xl font-bold text-warn">
+                        {v.porVencer.length}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Por vencer
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-stop/10 py-2">
+                      <p className="font-display text-xl font-bold text-stop">
+                        {v.vencidas.length}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Vencidas
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div>
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                        <span>Ganado</span>
+                        <span className="font-semibold text-go">
+                          {formatoMoneda(v.ganado)}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-line">
+                        <div
+                          className="bar-anim h-full bg-go"
+                          style={{ width: `${(v.ganado / maxBarra) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                        <span>Pipeline estimado</span>
+                        <span className="font-semibold text-brand">
+                          {formatoMoneda(v.estimado)}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-line">
+                        <div
+                          className="bar-anim h-full bg-brand"
+                          style={{ width: `${(v.estimado / maxBarra) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
         <div className="relative mt-5 overflow-hidden rounded-xl border border-line bg-panel2">
           <div className="tick absolute inset-y-0 right-0 w-24 opacity-30"></div>
           <div className="relative flex flex-wrap items-center justify-between gap-4 px-6 py-5">
