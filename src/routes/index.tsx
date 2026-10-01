@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { NuevaOportunidad } from "@/components/NuevaOportunidad";
 import { useOfertas } from "@/lib/useOfertas";
 import { predecirCierre } from "@/lib/ia";
@@ -196,6 +197,44 @@ function Index() {
 
   const pendientes = actividades.filter((a) => !a.hecha);
 
+  // Panel por vendedor: vigentes / por vencer / vencidas + pipeline personal
+  const panelVendedores = useMemo(() => {
+    const nombres = Array.from(new Set(oportunidades.map((o) => o.vendedor)));
+    return nombres.map((v) => {
+      const mias = oportunidades.filter((o) => o.vendedor === v);
+      const abiertas = mias.filter((o) => o.estado !== "Ganada" && o.estado !== "Perdida");
+      const vigentes = abiertas.filter((o) => diasRestantes(o.fechaCierre) > 7);
+      const porVencer = abiertas.filter((o) => {
+        const d = diasRestantes(o.fechaCierre);
+        return d >= 0 && d <= 7;
+      });
+      const vencidas = abiertas.filter((o) => diasRestantes(o.fechaCierre) < 0);
+      const ganado = mias
+        .filter((o) => o.estado === "Ganada")
+        .reduce((s, o) => s + o.valor, 0);
+      const estimado = abiertas.reduce((s, o) => s + o.valor, 0);
+      return { nombre: v, vigentes, porVencer, vencidas, ganado, estimado };
+    });
+  }, [oportunidades]);
+
+  // Notificaciones automáticas al responsable por ofertas que vencen en <7 días
+  const notificadas = useRef(false);
+  useEffect(() => {
+    if (!listo || notificadas.current) return;
+    notificadas.current = true;
+    alertas.forEach((o, i) => {
+      const d = diasRestantes(o.fechaCierre);
+      const detalle =
+        d < 0
+          ? `Vencida hace ${Math.abs(d)} días · Responsable: ${o.comercial}`
+          : `Vence en ${d} días · Responsable: ${o.comercial}`;
+      setTimeout(() => {
+        if (d < 0) toast.error(`${o.id} · ${o.nombre}`, { description: detalle });
+        else toast.warning(`${o.id} · ${o.nombre}`, { description: detalle });
+      }, 400 + i * 600);
+    });
+  }, [listo, alertas]);
+
   if (!listo) return <div className="min-h-screen bg-ink"></div>;
 
   return (
@@ -381,8 +420,17 @@ function Index() {
                     const s = semaforo(o);
                     const d = diasRestantes(o.fechaCierre);
                     const pred = predecirCierre(o);
+                    const critica =
+                      o.estado !== "Ganada" && o.estado !== "Perdida" && d < 7;
                     return (
-                      <tr key={o.id} className="group hover:bg-panel2/60">
+                      <tr
+                        key={o.id}
+                        className={`group ${
+                          critica
+                            ? "bg-stop/10 hover:bg-stop/15"
+                            : "hover:bg-panel2/60"
+                        }`}
+                      >
                         <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
                           <span className="flex items-center gap-2">
                             <span
@@ -616,6 +664,93 @@ function Index() {
                 </span>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="mt-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold uppercase tracking-wide">
+              Panel por vendedor
+            </h2>
+            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              vigentes · por vencer · vencidas
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {panelVendedores.map((v) => {
+              const maxBarra = Math.max(1, v.ganado, v.estimado);
+              return (
+                <div
+                  key={v.nombre}
+                  className="rounded-xl border border-line bg-panel p-5"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-display text-base font-semibold uppercase tracking-wide">
+                      {v.nombre}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {v.vigentes.length + v.porVencer.length + v.vencidas.length} abiertas
+                    </span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-lg bg-go/10 py-2">
+                      <p className="font-display text-xl font-bold text-go">
+                        {v.vigentes.length}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Vigentes
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-warn/10 py-2">
+                      <p className="font-display text-xl font-bold text-warn">
+                        {v.porVencer.length}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Por vencer
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-stop/10 py-2">
+                      <p className="font-display text-xl font-bold text-stop">
+                        {v.vencidas.length}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Vencidas
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div>
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                        <span>Ganado</span>
+                        <span className="font-semibold text-go">
+                          {formatoMoneda(v.ganado)}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-line">
+                        <div
+                          className="bar-anim h-full bg-go"
+                          style={{ width: `${(v.ganado / maxBarra) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                        <span>Pipeline estimado</span>
+                        <span className="font-semibold text-brand">
+                          {formatoMoneda(v.estimado)}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-line">
+                        <div
+                          className="bar-anim h-full bg-brand"
+                          style={{ width: `${(v.estimado / maxBarra) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
