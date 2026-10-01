@@ -132,7 +132,7 @@ export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
       else if (roja) doc.setTextColor(200, 30, 30);
       else doc.setTextColor(40, 50, 65);
       doc.text(String(v), x, y);
-      x += anchos[i];
+      x += anchos[i] ?? 0;
     });
     if (header) {
       doc.setDrawColor(15, 45, 90);
@@ -200,7 +200,7 @@ export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
     }
     vals.forEach((v, i) => {
       doc.text(String(v), x, y);
-      x += anchosV[i];
+      x += anchosV[i] ?? 0;
     });
     y += 15;
   };
