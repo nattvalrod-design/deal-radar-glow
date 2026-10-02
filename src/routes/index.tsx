@@ -67,9 +67,11 @@ function Index() {
     agregarOportunidad,
     eliminarOportunidad,
     alternarActividad,
+    ampliarDeadline,
   } = useOfertas();
 
   const [abrirForm, setAbrirForm] = useState(false);
+  const [ampliar, setAmpliar] = useState<Oportunidad | null>(null);
   const [busqueda, setBusqueda] = useState("");
   const [fEstado, setFEstado] = useState<Estado | "Todos">("Todos");
   const [fComercial, setFComercial] = useState("Todos");
@@ -258,6 +260,9 @@ function Index() {
           <div className="flex items-center gap-3">
             <Link to="/clientes" className="rounded-md border border-line bg-panel px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent hover:border-brand">
               Clientes
+            </Link>
+            <Link to="/inspektor" className="rounded-md border border-line bg-panel px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent hover:border-brand">
+              Inspektor
             </Link>
             <div className="hidden items-center gap-2 rounded-full border border-line bg-panel px-4 py-2 md:flex">
               <span className="size-2 rounded-full bg-brand"></span>
@@ -493,6 +498,22 @@ function Index() {
                           >
                             {d < 0 ? `${Math.abs(d)}d vencida` : `${d}d`}
                           </span>
+                          {o.ampliaciones?.length ? (
+                            <span
+                              title={o.ampliaciones.map((a) => `${a.anterior} → ${a.nueva}: ${a.motivo}`).join("\n")}
+                              className="ml-2 rounded bg-brand/15 px-1.5 py-0.5 text-[10px] font-semibold text-accent"
+                            >
+                              Ampliado ×{o.ampliaciones.length}
+                            </span>
+                          ) : null}
+                          {o.estado !== "Ganada" && o.estado !== "Perdida" && (
+                            <button
+                              onClick={() => setAmpliar(o)}
+                              className="ml-2 text-xs font-semibold text-brand underline-offset-2 hover:underline"
+                            >
+                              Ampliar
+                            </button>
+                          )}
                         </td>
                         <td className="px-5 py-4 text-right font-display font-semibold">
                           <span className="inline-flex items-center gap-3">
