@@ -57,6 +57,23 @@ export function useOfertas() {
     setActividades((prev) => [...prev, a]);
   }, []);
 
+  const ampliarDeadline = useCallback((id: string, nueva: string, motivo: string) => {
+    setOportunidades((prev) =>
+      prev.map((o) =>
+        o.id === id
+          ? {
+              ...o,
+              fechaCierre: nueva,
+              ampliaciones: [
+                ...(o.ampliaciones ?? []),
+                { anterior: o.fechaCierre, nueva, motivo, fecha: new Date().toISOString().slice(0, 10) },
+              ],
+            }
+          : o,
+      ),
+    );
+  }, []);
+
   return {
     oportunidades,
     actividades,
@@ -65,5 +82,6 @@ export function useOfertas() {
     eliminarOportunidad,
     alternarActividad,
     agregarActividad,
+    ampliarDeadline,
   };
 }

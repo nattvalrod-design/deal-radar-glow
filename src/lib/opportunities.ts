@@ -58,6 +58,14 @@ export type Oportunidad = {
   fechaCierre: string; // ISO date
   valor: number;
   notas?: string;
+  ampliaciones?: Ampliacion[];
+};
+
+export type Ampliacion = {
+  anterior: string;
+  nueva: string;
+  motivo: string;
+  fecha: string; // cuándo se registró
 };
 
 export type Semaforo = "verde" | "ambar" | "rojo";
