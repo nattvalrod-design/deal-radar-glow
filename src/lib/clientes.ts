@@ -1,15 +1,24 @@
 import type { EstadoInspektor } from "./opportunities";
 
 export type TipoEntidad = "Pública" | "Mixta";
-export type EstadoCartera = "Al día" | "En mora";
+export type OrigenCliente = "Nacional" | "Extranjero";
+export type CondicionCartera =
+  | "Pago anticipado"
+  | "Pago a 30 días"
+  | "Pago a 45 días"
+  | "Pago a 60 días"
+  | "Pago a 90 días"
+  | "Pago a 120 días"
+  | "Pago a 180 días";
 
 export type Cliente = {
   nombre: string; // debe coincidir con Oportunidad.cliente
   tipoEntidad: TipoEntidad;
+  origen: OrigenCliente;
   formaPago: string;
   diasPago: number;
   vip: boolean;
-  estadoCartera: EstadoCartera;
+  condicionCartera: CondicionCartera;
   inspektor: EstadoInspektor;
 };
 
@@ -22,11 +31,11 @@ export function requiereCartera(c: Cliente, valorOferta: number): boolean {
 }
 
 export const CLIENTES_SEED: Cliente[] = [
-  { nombre: "Empresa A", tipoEntidad: "Pública", formaPago: "Transferencia", diasPago: 60, vip: true, estadoCartera: "Al día", inspektor: "VIGENTE" },
-  { nombre: "Empresa B", tipoEntidad: "Mixta", formaPago: "Crédito 30/60", diasPago: 45, vip: false, estadoCartera: "Al día", inspektor: "POR VENCER" },
-  { nombre: "Empresa C", tipoEntidad: "Pública", formaPago: "Anticipo 30% + saldo", diasPago: 90, vip: false, estadoCartera: "En mora", inspektor: "VENCIDO" },
-  { nombre: "Empresa D", tipoEntidad: "Mixta", formaPago: "Transferencia", diasPago: 30, vip: true, estadoCartera: "Al día", inspektor: "VIGENTE" },
-  { nombre: "Empresa E", tipoEntidad: "Pública", formaPago: "Carta de crédito", diasPago: 75, vip: false, estadoCartera: "Al día", inspektor: "POR VENCER" },
-  { nombre: "Empresa F", tipoEntidad: "Mixta", formaPago: "Crédito 60 días", diasPago: 60, vip: false, estadoCartera: "En mora", inspektor: "VENCIDO" },
-  { nombre: "Empresa G", tipoEntidad: "Pública", formaPago: "Transferencia", diasPago: 120, vip: true, estadoCartera: "Al día", inspektor: "VIGENTE" },
+  { nombre: "Empresa A", tipoEntidad: "Pública", origen: "Nacional", formaPago: "Transferencia", diasPago: 60, vip: true, condicionCartera: "Pago a 60 días", inspektor: "VIGENTE" },
+  { nombre: "Empresa B", tipoEntidad: "Mixta", origen: "Nacional", formaPago: "Transferencia", diasPago: 45, vip: false, condicionCartera: "Pago a 45 días", inspektor: "POR VENCER" },
+  { nombre: "Empresa C", tipoEntidad: "Pública", origen: "Extranjero", formaPago: "Transferencia", diasPago: 90, vip: false, condicionCartera: "Pago a 90 días", inspektor: "VENCIDO" },
+  { nombre: "Empresa D", tipoEntidad: "Mixta", origen: "Nacional", formaPago: "Transferencia", diasPago: 30, vip: true, condicionCartera: "Pago a 30 días", inspektor: "VIGENTE" },
+  { nombre: "Empresa E", tipoEntidad: "Pública", origen: "Extranjero", formaPago: "Carta de crédito", diasPago: 0, vip: false, condicionCartera: "Pago anticipado", inspektor: "POR VENCER" },
+  { nombre: "Empresa F", tipoEntidad: "Mixta", origen: "Nacional", formaPago: "Transferencia", diasPago: 120, vip: false, condicionCartera: "Pago a 120 días", inspektor: "VENCIDO" },
+  { nombre: "Empresa G", tipoEntidad: "Pública", origen: "Extranjero", formaPago: "Carta de crédito", diasPago: 180, vip: true, condicionCartera: "Pago a 180 días", inspektor: "VIGENTE" },
 ];

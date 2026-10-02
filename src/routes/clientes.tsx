@@ -31,7 +31,6 @@ function Clientes() {
         return {
           c,
           adjudicadas,
-          total: adjudicadas.reduce((s, o) => s + o.valor, 0),
           consultaCartera: adjudicadas.length > 0 ? requiereCartera(c, mayor) : !c.vip,
         };
       }),
@@ -76,28 +75,30 @@ function Clientes() {
               <tr>
                 <th className={th}>Cliente</th>
                 <th className={th}>Entidad</th>
+                <th className={th}>Origen</th>
                 <th className={th}>Forma de pago</th>
                 <th className={th}>Días de pago</th>
                 <th className={th}>VIP</th>
                 <th className={th}>Cartera</th>
                 <th className={th}>Inspektor</th>
                 <th className={th}>Ofertas adjudicadas</th>
-                <th className={th}>Valor adjudicado</th>
+                <th className={th}>Código oportunidad</th>
               </tr>
             </thead>
             <tbody>
-              {filas.map(({ c, adjudicadas, total, consultaCartera }) => (
+              {filas.map(({ c, adjudicadas, consultaCartera }) => (
                 <tr key={c.nombre} className="border-b border-line last:border-0">
                   <td className="px-4 py-3 font-semibold">{c.nombre}</td>
                   <td className="px-4 py-3">{c.tipoEntidad}</td>
+                  <td className="px-4 py-3">{c.origen}</td>
                   <td className="px-4 py-3">{c.formaPago}</td>
-                  <td className="px-4 py-3">{c.diasPago} días</td>
+                  <td className="px-4 py-3">{c.diasPago === 0 ? "Anticipado" : `${c.diasPago} días`}</td>
                   <td className="px-4 py-3">
                     {c.vip ? <span className="rounded bg-brand/15 px-2 py-0.5 text-xs font-semibold text-accent">VIP</span> : "—"}
                   </td>
                   <td className="px-4 py-3">
                     {consultaCartera ? (
-                      <span className={c.estadoCartera === "Al día" ? "text-go" : "text-stop"}>{c.estadoCartera}</span>
+                      <span>{c.condicionCartera}</span>
                     ) : (
                       <span className="text-xs text-muted-foreground">No requiere consulta</span>
                     )}
@@ -106,9 +107,11 @@ function Clientes() {
                     <span className={`rounded px-2 py-0.5 text-xs font-semibold ${COLOR_INSPEKTOR[c.inspektor]}`}>{c.inspektor}</span>
                   </td>
                   <td className="px-4 py-3 text-xs">
-                    {adjudicadas.length ? adjudicadas.map((o) => `${o.id} · ${o.nombre}`).join(", ") : <span className="text-muted-foreground">Sin adjudicaciones</span>}
+                    {adjudicadas.length ? adjudicadas.map((o) => o.nombre).join(", ") : <span className="text-muted-foreground">Sin adjudicaciones</span>}
                   </td>
-                  <td className="px-4 py-3 font-semibold">{formatoMoneda(total)}</td>
+                  <td className="px-4 py-3 font-semibold text-accent">
+                    {adjudicadas.length ? adjudicadas.map((o) => o.id).join(", ") : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>
