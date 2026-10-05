@@ -59,6 +59,7 @@ export type Oportunidad = {
   valor: number;
   notas?: string;
   ampliaciones?: Ampliacion[];
+  diasValidez?: number;
 };
 
 export type Ampliacion = {
@@ -232,3 +233,22 @@ export const ACTIVIDADES_SEED: Actividad[] = [
     hecha: false,
   },
 ];
+
+/** Días de validez de oferta por defecto cuando no se especifican. */
+export const DIAS_VALIDEZ_DEFAULT = 90;
+
+/** Fecha en la que la oferta deja de ser válida (fecha de entrega + días de validez). */
+export function fechaFinValidez(o: Oportunidad): string {
+  const d = new Date(o.fechaCierre + "T00:00:00");
+  d.setDate(d.getDate() + (o.diasValidez ?? DIAS_VALIDEZ_DEFAULT));
+  return d.toISOString().slice(0, 10);
+}
+
+/** Umbral de aprobación para MV y PA (USD). */
+export const UMBRAL_REUNION = 150_000;
+
+/** MV y PA requieren reunión desde 150K USD; CS no aplica. */
+export function requiereReunion(o: Oportunidad): boolean | null {
+  if (o.segmento === "CS") return null;
+  return o.valor >= UMBRAL_REUNION;
+}

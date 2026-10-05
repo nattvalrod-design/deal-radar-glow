@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as InspektorRouteImport } from './routes/inspektor'
+import { Route as PrerequisitoRouteImport } from './routes/prerequisito'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,49 @@ const ClientesRoute = ClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InspektorRoute = InspektorRouteImport.update({
+  id: '/inspektor',
+  path: '/inspektor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrerequisitoRoute = PrerequisitoRouteImport.update({
+  id: '/prerequisito',
+  path: '/prerequisito',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/clientes': typeof ClientesRoute
+  '/inspektor': typeof InspektorRoute
+  '/prerequisito': typeof PrerequisitoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/clientes': typeof ClientesRoute
+  '/inspektor': typeof InspektorRoute
+  '/prerequisito': typeof PrerequisitoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/clientes': typeof ClientesRoute
+  '/inspektor': typeof InspektorRoute
+  '/prerequisito': typeof PrerequisitoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clientes'
+  fullPaths: '/' | '/clientes' | '/inspektor' | '/prerequisito'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clientes'
-  id: '__root__' | '/' | '/clientes'
+  to: '/' | '/clientes' | '/inspektor' | '/prerequisito'
+  id: '__root__' | '/' | '/clientes' | '/inspektor' | '/prerequisito'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ClientesRoute: typeof ClientesRoute
+  InspektorRoute: typeof InspektorRoute
+  PrerequisitoRoute: typeof PrerequisitoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inspektor': {
+      id: '/inspektor'
+      path: '/inspektor'
+      fullPath: '/inspektor'
+      preLoaderRoute: typeof InspektorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prerequisito': {
+      id: '/prerequisito'
+      path: '/prerequisito'
+      fullPath: '/prerequisito'
+      preLoaderRoute: typeof PrerequisitoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ClientesRoute: ClientesRoute,
+  InspektorRoute: InspektorRoute,
+  PrerequisitoRoute: PrerequisitoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
