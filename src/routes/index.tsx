@@ -16,11 +16,16 @@ import {
   formatoFecha,
   formatoMoneda,
   semaforo,
+  DIAS_VALIDEZ_DEFAULT,
+  fechaFinValidez,
   type Estado,
   type EstadoInspektor,
+  type Oportunidad,
   type Segmento,
   type Semaforo,
 } from "@/lib/opportunities";
+import { AmpliarDeadline } from "@/components/AmpliarDeadline";
+
 
 
 export const Route = createFileRoute("/")({
@@ -261,6 +266,9 @@ function Index() {
             <Link to="/clientes" className="rounded-md border border-line bg-panel px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent hover:border-brand">
               Clientes
             </Link>
+            <Link to="/prerequisito" className="rounded-md border border-line bg-panel px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent hover:border-brand">
+              Pre-requisito aprobación
+            </Link>
             <Link to="/inspektor" className="rounded-md border border-line bg-panel px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent hover:border-brand">
               Inspektor
             </Link>
@@ -433,7 +441,8 @@ function Index() {
 
                     <th className="px-3 py-3 text-left font-medium">Estado</th>
                     <th className="px-3 py-3 text-left font-medium">Cierre</th>
-                    <th className="px-5 py-3 text-right font-medium">Valor</th>
+                    <th className="px-3 py-3 text-left font-medium">Validez</th>
+                    <th className="px-5 py-3 text-right font-medium">Válida hasta</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line/60">
@@ -515,9 +524,14 @@ function Index() {
                             </button>
                           )}
                         </td>
-                        <td className="px-5 py-4 text-right font-display font-semibold">
+                        <td className="px-3 py-4 text-muted-foreground">
+                          {o.diasValidez ?? DIAS_VALIDEZ_DEFAULT} días
+                        </td>
+                        <td className="px-5 py-4 text-right">
                           <span className="inline-flex items-center gap-3">
-                            {formatoMoneda(o.valor)}
+                            <span className={diasRestantes(fechaFinValidez(o)) < 0 ? "text-stop" : "text-muted-foreground"}>
+                              {formatoFecha(fechaFinValidez(o))}
+                            </span>
                             <button
                               onClick={() => eliminarOportunidad(o.id)}
                               aria-label={`Eliminar ${o.id}`}
@@ -814,6 +828,17 @@ function Index() {
         <NuevaOportunidad
           onGuardar={agregarOportunidad}
           onCerrar={() => setAbrirForm(false)}
+        />
+      )}
+      {ampliar && (
+        <AmpliarDeadline
+          o={ampliar}
+          onGuardar={(f, m) => {
+            ampliarDeadline(ampliar.id, f, m);
+            toast.success(`Deadline de ${ampliar.id} ampliado a ${formatoFecha(f)}`);
+            setAmpliar(null);
+          }}
+          onCerrar={() => setAmpliar(null)}
         />
       )}
     </div>
