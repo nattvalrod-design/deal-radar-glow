@@ -39,3 +39,11 @@ export const CLIENTES_SEED: Cliente[] = [
   { nombre: "Empresa F", tipoEntidad: "Mixta", origen: "Nacional", formaPago: "Transferencia", diasPago: 120, vip: false, condicionCartera: "Pago a 120 días", inspektor: "VENCIDO" },
   { nombre: "Empresa G", tipoEntidad: "Pública", origen: "Extranjero", formaPago: "Carta de crédito", diasPago: 180, vip: true, condicionCartera: "Pago a 180 días", inspektor: "VIGENTE" },
 ];
+
+/** Fecha (relativa a hoy) en la que el documento Inspektor deja de ser vigente. */
+const DIAS_VENCE: Record<EstadoInspektor, number> = { VIGENTE: 180, "POR VENCER": 20, VENCIDO: -15 };
+export function venceInspektor(c: Cliente, i: number): string {
+  const d = new Date(new Date().toDateString());
+  d.setDate(d.getDate() + DIAS_VENCE[c.inspektor] + i * 3);
+  return d.toISOString().slice(0, 10);
+}

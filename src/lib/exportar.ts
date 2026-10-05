@@ -4,6 +4,9 @@ import {
   formatoMoneda,
   semaforo,
   SEMAFORO_LABEL,
+  DIAS_VALIDEZ_DEFAULT,
+  fechaFinValidez,
+  requiereReunion,
   type Oportunidad,
 } from "./opportunities";
 
@@ -218,4 +221,42 @@ export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
   });
 
   doc.save("offerpulse-pipeline.pdf");
+}
+
+export function exportarPrerequisitoPDF(ops: Oportunidad[], filtro: string) {
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt" });
+  const H = doc.internal.pageSize.getHeight();
+  let y = 48;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(15, 45, 90);
+  doc.text("OfferPulse — Pre-requisito aprobación", 40, y);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(110, 120, 135);
+  doc.text(`${filtro} · Ordenado por fecha de entrega · ${new Date().toLocaleDateString("es-ES")}`, 40, y + 16);
+  y += 44;
+  const cols = ["ID", "Oportunidad", "Cliente", "Bid manager", "Commercial BM", "Seg.", "Entrega", "Validez", "Válida hasta", "Valor", "Reunión"];
+  const anchos = [55, 170, 65, 70, 80, 32, 62, 45, 65, 55, 70];
+  const fila = (vals: (string | number)[], header = false) => {
+    if (y > H - 40) { doc.addPage(); y = 48; }
+    doc.setFont("helvetica", header ? "bold" : "normal");
+    doc.setFontSize(8.5);
+    if (header) {
+      doc.setFillColor(15, 45, 90);
+      doc.rect(36, y - 11, anchos.reduce((a, b) => a + b, 0) + 8, 16, "F");
+      doc.setTextColor(255, 255, 255);
+    } else doc.setTextColor(40, 50, 65);
+    let x = 40;
+    vals.forEach((v, i) => { doc.text(String(v), x, y); x += anchos[i] ?? 0; });
+    y += 15;
+  };
+  fila(cols, true);
+  [...ops].sort((a, b) => a.fechaCierre.localeCompare(b.fechaCierre)).forEach((o) => {
+    const r = requiereReunion(o);
+    fila([o.id, o.nombre.slice(0, 36), o.cliente, o.tecnico, o.comercial, o.segmento, o.fechaCierre,
+      `${o.diasValidez ?? DIAS_VALIDEZ_DEFAULT} d`, fechaFinValidez(o), formatoMoneda(o.valor),
+      r === null ? "No aplica" : r ? "Requiere" : "No requiere"]);
+  });
+  doc.save("offerpulse-prerequisito-aprobacion.pdf");
 }
