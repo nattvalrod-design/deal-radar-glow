@@ -92,7 +92,7 @@ export function exportarCSV(ops: Oportunidad[], panel: PanelVendedor[]) {
   descargar("offerpulse-pipeline.csv", blob);
 }
 
-export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
+export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[], filtro?: string) {
   const doc = new jsPDF({ orientation: "landscape", unit: "pt" });
   const W = doc.internal.pageSize.getWidth();
   let y = 48;
@@ -104,7 +104,7 @@ export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(110, 120, 135);
-  doc.text(`Generado: ${new Date().toLocaleDateString("es-ES")}`, 40, y + 16);
+  doc.text(`${filtro ? filtro + " · " : ""}Generado: ${new Date().toLocaleDateString("es-ES")}`, 40, y + 16);
   y += 40;
 
   const cols = [
@@ -220,7 +220,7 @@ export function exportarPDF(ops: Oportunidad[], panel: PanelVendedor[]) {
     ]);
   });
 
-  doc.save("offerpulse-pipeline.pdf");
+  doc.save(filtro ? `offerpulse-pipeline-${filtro.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf` : "offerpulse-pipeline.pdf");
 }
 
 export function exportarPrerequisitoPDF(ops: Oportunidad[], filtro: string) {

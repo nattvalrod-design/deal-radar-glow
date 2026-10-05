@@ -81,6 +81,11 @@ function Index() {
   const [fEstado, setFEstado] = useState<Estado | "Todos">("Todos");
   const [fComercial, setFComercial] = useState("Todos");
   const [fTecnico, setFTecnico] = useState("Todos");
+  const [fPersona, setFPersona] = useState("Todos");
+  const personas = useMemo(
+    () => [...new Set(oportunidades.flatMap((o) => [o.comercial, o.tecnico]))].sort(),
+    [oportunidades],
+  );
   const [fSegmento, setFSegmento] = useState<Segmento | "Todos">("Todos");
   const [fInspektor, setFInspektor] = useState<EstadoInspektor | "Todos">("Todos");
   const [soloSemana, setSoloSemana] = useState(false);
@@ -109,6 +114,7 @@ function Index() {
             return false;
           if (fEstado !== "Todos" && o.estado !== fEstado) return false;
           if (fComercial !== "Todos" && o.comercial !== fComercial) return false;
+          if (fPersona !== "Todos" && o.comercial !== fPersona && o.tecnico !== fPersona) return false;
           if (fTecnico !== "Todos" && o.tecnico !== fTecnico) return false;
           if (fSegmento !== "Todos" && o.segmento !== fSegmento) return false;
           if (fInspektor !== "Todos" && o.inspektor !== fInspektor) return false;
@@ -123,6 +129,7 @@ function Index() {
       busqueda,
       fEstado,
       fComercial,
+      fPersona,
       fTecnico,
       fSegmento,
       fInspektor,
@@ -288,7 +295,9 @@ function Index() {
               CSV
             </button>
             <button
-              onClick={() => exportarPDF(filtradas, panelVendedores)}
+              onClick={() =>
+                exportarPDF(filtradas, panelVendedores, fPersona !== "Todos" ? `Responsable: ${fPersona}` : undefined)
+              }
               className="rounded-md border border-line bg-panel px-4 py-2.5 font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground hover:border-accent/40 hover:text-accent"
             >
               PDF
@@ -357,6 +366,20 @@ function Index() {
           >
             Esta semana
           </button>
+          <select
+            value={fPersona}
+            onChange={(e) => setFPersona(e.target.value)}
+            className={`rounded-full border px-4 py-1.5 text-sm outline-none ${
+              fPersona !== "Todos"
+                ? "border-brand/40 bg-brand/10 font-medium text-brand"
+                : "border-line bg-panel text-muted-foreground hover:border-accent/40"
+            }`}
+          >
+            <option value="Todos">Nombre (comercial o técnico): Todos</option>
+            {personas.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
           <select
             value={fComercial}
             onChange={(e) => setFComercial(e.target.value)}
