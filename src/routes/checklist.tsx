@@ -21,7 +21,7 @@ const KEY = "ofertas.checklist.v1";
 type Estado = Record<string, Record<string, boolean>>;
 
 export const Route = createFileRoute("/checklist")({
-  validateSearch: (s: Record<string, unknown>) => ({ id: typeof s.id === "string" ? s.id : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({ id: typeof s["id"] === "string" ? s["id"] : undefined }),
   head: () => ({
     meta: [
       { title: "Checklist de verificación — OfferPulse" },
