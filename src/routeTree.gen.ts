@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChecklistRouteImport } from './routes/checklist'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as InspektorRouteImport } from './routes/inspektor'
 import { Route as PrerequisitoRouteImport } from './routes/prerequisito'
@@ -17,6 +18,11 @@ import { Route as PrerequisitoRouteImport } from './routes/prerequisito'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChecklistRoute = ChecklistRouteImport.update({
+  id: '/checklist',
+  path: '/checklist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientesRoute = ClientesRouteImport.update({
@@ -37,12 +43,14 @@ const PrerequisitoRoute = PrerequisitoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/checklist': typeof ChecklistRoute
   '/clientes': typeof ClientesRoute
   '/inspektor': typeof InspektorRoute
   '/prerequisito': typeof PrerequisitoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/checklist': typeof ChecklistRoute
   '/clientes': typeof ClientesRoute
   '/inspektor': typeof InspektorRoute
   '/prerequisito': typeof PrerequisitoRoute
@@ -50,20 +58,28 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/checklist': typeof ChecklistRoute
   '/clientes': typeof ClientesRoute
   '/inspektor': typeof InspektorRoute
   '/prerequisito': typeof PrerequisitoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clientes' | '/inspektor' | '/prerequisito'
+  fullPaths: '/' | '/checklist' | '/clientes' | '/inspektor' | '/prerequisito'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clientes' | '/inspektor' | '/prerequisito'
-  id: '__root__' | '/' | '/clientes' | '/inspektor' | '/prerequisito'
+  to: '/' | '/checklist' | '/clientes' | '/inspektor' | '/prerequisito'
+  id:
+    | '__root__'
+    | '/'
+    | '/checklist'
+    | '/clientes'
+    | '/inspektor'
+    | '/prerequisito'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChecklistRoute: typeof ChecklistRoute
   ClientesRoute: typeof ClientesRoute
   InspektorRoute: typeof InspektorRoute
   PrerequisitoRoute: typeof PrerequisitoRoute
@@ -76,6 +92,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checklist': {
+      id: '/checklist'
+      path: '/checklist'
+      fullPath: '/checklist'
+      preLoaderRoute: typeof ChecklistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes': {
@@ -104,6 +127,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChecklistRoute: ChecklistRoute,
   ClientesRoute: ClientesRoute,
   InspektorRoute: InspektorRoute,
   PrerequisitoRoute: PrerequisitoRoute,
