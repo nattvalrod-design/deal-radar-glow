@@ -232,6 +232,12 @@ function Index() {
     });
   }, [oportunidades]);
 
+  // Ofertas no adjudicadas cuya validez vence en 15 días o menos (o ya venció)
+  const alertasValidez = activas
+    .map((o) => ({ o, d: diasRestantes(fechaFinValidez(o)) }))
+    .filter(({ d }) => d <= 15)
+    .sort((a, b) => a.d - b.d);
+
   // Notificaciones automáticas al responsable por ofertas que vencen en <7 días
   const notificadas = useRef(false);
   useEffect(() => {
@@ -248,7 +254,17 @@ function Index() {
         else toast.warning(`${o.id} · ${o.nombre}`, { description: detalle });
       }, 400 + i * 600);
     });
-  }, [listo, alertas]);
+    alertasValidez.forEach(({ o, d }, i) => {
+      const detalle =
+        d < 0
+          ? `Validez de la oferta vencida hace ${Math.abs(d)} días · Responsable: ${o.comercial}`
+          : `La validez de la oferta vence en ${d} días (${formatoFecha(fechaFinValidez(o))}) · Responsable: ${o.comercial}`;
+      setTimeout(() => {
+        if (d < 0) toast.error(`Validez · ${o.id} · ${o.nombre}`, { description: detalle });
+        else toast.warning(`Validez · ${o.id} · ${o.nombre}`, { description: detalle });
+      }, 400 + (alertas.length + i) * 600);
+    });
+  }, [listo, alertas, alertasValidez]);
 
   if (!listo) return <div className="min-h-screen bg-ink"></div>;
 
