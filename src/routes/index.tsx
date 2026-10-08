@@ -571,7 +571,7 @@ function Index() {
                         </td>
                         <td className="px-5 py-4 text-right">
                           <span className="inline-flex items-center gap-3">
-                            <span className={diasRestantes(fechaFinValidez(o)) < 0 ? "text-stop" : "text-muted-foreground"}>
+                            <span className={diasRestantes(fechaFinValidez(o)) < 0 ? "text-stop" : diasRestantes(fechaFinValidez(o)) <= 15 && o.estado !== "Ganada" && o.estado !== "Perdida" ? "text-warn" : "text-muted-foreground"}>
                               {formatoFecha(fechaFinValidez(o))}
                             </span>
                             <button
