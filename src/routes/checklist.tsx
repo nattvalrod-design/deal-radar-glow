@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { TAREAS, useChecklist } from "@/lib/checklist";
 import { useOfertas } from "@/lib/useOfertas";
-import { diasRestantes, formatoFecha } from "@/lib/opportunities";
+import { formatoFecha } from "@/lib/opportunities";
 
 export const Route = createFileRoute("/checklist")({
   validateSearch: (s: Record<string, unknown>) => ({ id: typeof s["id"] === "string" ? s["id"] : undefined }),
@@ -89,7 +89,7 @@ function Checklist() {
                         <span className={`text-xs font-semibold ${n === aplicanDe(x.id).length ? "text-go" : "text-muted-foreground"}`}>{n}/{cargado ? aplicanDe(x.id).length : TAREAS.length}</span>
                       </span>
                       <span className="block truncate">{x.nombre}</span>
-                      <span className={`block text-[11px] ${diasRestantes(x.fechaCierre) < 0 ? "text-stop" : diasRestantes(x.fechaCierre) <= 7 ? "text-warn" : "text-muted-foreground"}`}>Entrega {formatoFecha(x.fechaCierre)} · {diasRestantes(x.fechaCierre) < 0 ? `vencida hace ${-diasRestantes(x.fechaCierre)} d` : `faltan ${diasRestantes(x.fechaCierre)} d`}</span>
+                      <span className="block text-[11px] text-muted-foreground">Entrega {formatoFecha(x.fechaCierre)}</span>
                     </button>
                   </li>
                 );
