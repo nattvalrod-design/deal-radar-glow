@@ -1,24 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { TAREAS, useChecklist } from "@/lib/checklist";
 import { useOfertas } from "@/lib/useOfertas";
 import { formatoFecha } from "@/lib/opportunities";
-
-const TAREAS = [
-  "Pliegos",
-  "Consultas sobre la oferta",
-  "Formatos",
-  "Consulta Taxes",
-  "Consulta Cartera",
-  "Póliza de seriedad",
-  "Otras pólizas",
-  "Factores financieros",
-  "Soporte del formato de escalación",
-  "Formato de escalación APLICA",
-  "FOCAL",
-];
-
-const KEY = "ofertas.checklist.v1";
-type Estado = Record<string, Record<string, boolean>>;
 
 export const Route = createFileRoute("/checklist")({
   validateSearch: (s: Record<string, unknown>) => ({ id: typeof s["id"] === "string" ? s["id"] : undefined }),
@@ -39,16 +23,13 @@ function Checklist() {
   const { id } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { oportunidades, listo } = useOfertas();
-  const [estado, setEstado] = useState<Estado>({});
-  const [cargado, setCargado] = useState(false);
+  const { estado, cargado, alternar: alt } = useChecklist();
+  const [rol, setRol] = useState<"vendedor" | "comercial" | "tecnico">("comercial");
+  const [persona, setPersona] = useState("");
+  const nombres = Array.from(new Set(oportunidades.map((x) => x[rol]))).sort();
+  const lista = oportunidades.filter((x) => !persona || x[rol] === persona);
 
-  useEffect(() => {
-    try { setEstado(JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { /* */ }
-    setCargado(true);
-  }, []);
-  useEffect(() => { if (cargado) localStorage.setItem(KEY, JSON.stringify(estado)); }, [estado, cargado]);
-
-  const seleccion = id ?? oportunidades[0]?.id;
+  const seleccion = id ?? lista[0]?.id;
   const o = oportunidades.find((x) => x.id === seleccion);
   const marcas = (seleccion && estado[seleccion]) || {};
   const hechas = TAREAS.filter((t) => marcas[t]).length;
@@ -56,7 +37,7 @@ function Checklist() {
 
   const alternar = (t: string) => {
     if (!seleccion) return;
-    setEstado((p) => ({ ...p, [seleccion]: { ...(p[seleccion] ?? {}), [t]: !p[seleccion]?.[t] } }));
+    alt(seleccion, t);
   };
 
   const progreso = (oid: string) => TAREAS.filter((t) => estado[oid]?.[t]).length;
@@ -74,8 +55,19 @@ function Checklist() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
           <aside className="rounded-xl border border-line bg-panel p-3">
             <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Ofertas del pipeline</p>
+            <div className="mb-3 grid grid-cols-2 gap-2 px-2">
+              <select aria-label="Rol" value={rol} onChange={(e) => { setRol(e.target.value as typeof rol); setPersona(""); }} className="rounded-md border border-line bg-panel2 px-2 py-1.5 text-sm">
+                <option value="vendedor">Vendedor</option>
+                <option value="comercial">Comercial</option>
+                <option value="tecnico">Técnico</option>
+              </select>
+              <select aria-label="Persona" value={persona} onChange={(e) => setPersona(e.target.value)} className="rounded-md border border-line bg-panel2 px-2 py-1.5 text-sm">
+                <option value="">Todos</option>
+                {nombres.map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
             <ul className="space-y-1">
-              {listo && oportunidades.map((x) => {
+              {listo && lista.map((x) => {
                 const n = cargado ? progreso(x.id) : 0;
                 const activo = x.id === seleccion;
                 return (
@@ -104,7 +96,7 @@ function Checklist() {
                 <p className="font-mono text-xs text-muted-foreground">{o.id}</p>
                 <h2 className="font-display text-xl font-bold">{o.nombre}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {o.cliente} · {o.segmento} · Comercial {o.comercial} · Técnico {o.tecnico} · Entrega {formatoFecha(o.fechaCierre)}
+                  {o.cliente} · {o.segmento} · Comercial {o.comercial} · Técnico {o.tecnico} · Vendedor {o.vendedor} · Entrega {formatoFecha(o.fechaCierre)}
                 </p>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm"><span>Verificación</span><span className="font-semibold">{hechas}/{TAREAS.length} · {pct}%</span></div>

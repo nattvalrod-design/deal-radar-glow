@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { NuevaOportunidad } from "@/components/NuevaOportunidad";
+import { TAREAS, useChecklist } from "@/lib/checklist";
 import { useOfertas } from "@/lib/useOfertas";
 import { predecirCierre } from "@/lib/ia";
 import { exportarCSV, exportarPDF } from "@/lib/exportar";
@@ -67,11 +68,9 @@ const COLOR_ESTADO: Record<Estado, string> = {
 function Index() {
   const {
     oportunidades,
-    actividades,
     listo,
     agregarOportunidad,
     eliminarOportunidad,
-    alternarActividad,
     ampliarDeadline,
   } = useOfertas();
 
@@ -210,7 +209,12 @@ function Index() {
   }));
   const maxEtapa = Math.max(1, ...porEtapa.map((p) => p.total));
 
-  const pendientes = actividades.filter((a) => !a.hecha);
+  const checklist = useChecklist();
+  const pendientes = oportunidades
+    .filter((o) => o.estado !== "Ganada" && o.estado !== "Perdida")
+    .map((o) => ({ o, faltan: checklist.pendientesDe(o.id) }))
+    .filter((x) => x.faltan.length > 0)
+    .sort((a, b) => a.o.fechaCierre.localeCompare(b.o.fechaCierre));
 
   // Panel por vendedor: vigentes / por vencer / vencidas + pipeline personal
   const panelVendedores = useMemo(() => {
@@ -668,22 +672,25 @@ function Index() {
               Actividades pendientes
             </h2>
             <div className="space-y-2.5">
-              {pendientes.map((a) => {
-                const d = diasRestantes(a.fecha);
+              {checklist.cargado && pendientes.map(({ o, faltan }) => {
+                const d = diasRestantes(o.fechaCierre);
                 return (
-                  <button
-                    key={a.id}
-                    onClick={() => alternarActividad(a.id)}
-                    className="flex w-full items-center gap-3 rounded-lg bg-panel2 px-4 py-3 text-left hover:bg-brand/15"
-                  >
-                    <span className="size-4 shrink-0 rounded-full border-2 border-accent/30"></span>
-                    <span className="flex-1 text-sm">{a.titulo}</span>
-                    <span
-                      className={`text-[11px] font-semibold uppercase tracking-wide ${d <= 0 ? "text-accent" : "text-muted-foreground"}`}
-                    >
-                      {d < 0 ? "Atrasada" : d === 0 ? "Hoy" : formatoFecha(a.fecha)}
+                  <div key={o.id} className="flex items-center gap-3 rounded-lg bg-panel2 px-4 py-3">
+                    <button
+                      title="Marcar como hecha"
+                      onClick={() => checklist.alternar(o.id, faltan[0])}
+                      className="size-4 shrink-0 rounded-full border-2 border-accent/30 hover:bg-accent/30"
+                    ></button>
+                    <Link to="/checklist" search={{ id: o.id }} className="flex-1 text-sm hover:text-accent">
+                      <span className="font-mono text-xs text-muted-foreground">{o.id}</span> · {faltan[0]}
+                      <span className="block text-[11px] text-muted-foreground">
+                        {o.cliente} · {TAREAS.length - faltan.length}/{TAREAS.length} verificadas · {faltan.length} pendientes
+                      </span>
+                    </Link>
+                    <span className={`text-[11px] font-semibold uppercase tracking-wide ${d <= 0 ? "text-accent" : "text-muted-foreground"}`}>
+                      {d < 0 ? "Atrasada" : d === 0 ? "Hoy" : formatoFecha(o.fechaCierre)}
                     </span>
-                  </button>
+                  </div>
                 );
               })}
               {pendientes.length === 0 && (
