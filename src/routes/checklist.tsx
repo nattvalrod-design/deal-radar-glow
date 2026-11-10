@@ -23,7 +23,9 @@ function Checklist() {
   const { id } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { oportunidades, listo } = useOfertas();
-  const { estado, cargado, alternar: alt } = useChecklist();
+  const { estado, cargado, alternar: alt, na, comentarios, alternarNA, comentar, aplicanDe, pendientesDe } = useChecklist();
+  const [abierta, setAbierta] = useState<string | null>(null);
+  const [texto, setTexto] = useState("");
   const [rol, setRol] = useState<"vendedor" | "comercial" | "tecnico">("comercial");
   const [persona, setPersona] = useState("");
   const nombres = Array.from(new Set(oportunidades.map((x) => x[rol]))).sort();
@@ -32,15 +34,18 @@ function Checklist() {
   const seleccion = id ?? lista[0]?.id;
   const o = oportunidades.find((x) => x.id === seleccion);
   const marcas = (seleccion && estado[seleccion]) || {};
-  const hechas = TAREAS.filter((t) => marcas[t]).length;
-  const pct = Math.round((hechas / TAREAS.length) * 100);
+  const nas = (seleccion && na[seleccion]) || {};
+  const coms = (seleccion && comentarios[seleccion]) || {};
+  const total = seleccion ? aplicanDe(seleccion).length : TAREAS.length;
+  const hechas = seleccion ? total - pendientesDe(seleccion).length : 0;
+  const pct = total ? Math.round((hechas / total) * 100) : 100;
 
   const alternar = (t: string) => {
     if (!seleccion) return;
     alt(seleccion, t);
   };
 
-  const progreso = (oid: string) => TAREAS.filter((t) => estado[oid]?.[t]).length;
+  const progreso = (oid: string) => aplicanDe(oid).length - pendientesDe(oid).length;
 
   return (
     <div className="min-h-screen bg-ink text-foreground">
@@ -78,7 +83,7 @@ function Checklist() {
                     >
                       <span className="flex justify-between gap-2">
                         <span className="font-mono text-xs">{x.id}</span>
-                        <span className={`text-xs font-semibold ${n === TAREAS.length ? "text-go" : "text-muted-foreground"}`}>{n}/{TAREAS.length}</span>
+                        <span className={`text-xs font-semibold ${n === aplicanDe(x.id).length ? "text-go" : "text-muted-foreground"}`}>{n}/{cargado ? aplicanDe(x.id).length : TAREAS.length}</span>
                       </span>
                       <span className="block truncate">{x.nombre}</span>
                     </button>
@@ -99,20 +104,47 @@ function Checklist() {
                   {o.cliente} · {o.segmento} · Comercial {o.comercial} · Técnico {o.tecnico} · Vendedor {o.vendedor} · Entrega {formatoFecha(o.fechaCierre)}
                 </p>
                 <div className="mt-4">
-                  <div className="flex justify-between text-sm"><span>Verificación</span><span className="font-semibold">{hechas}/{TAREAS.length} · {pct}%</span></div>
+                  <div className="flex justify-between text-sm"><span>Verificación</span><span className="font-semibold">{hechas}/{total} · {pct}%{TAREAS.length - total > 0 ? ` · ${TAREAS.length - total} no aplica` : ""}</span></div>
                   <div className="mt-1 h-2 overflow-hidden rounded-full bg-panel2">
                     <div className={`h-full ${pct === 100 ? "bg-go" : "bg-brand"}`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
                 <ul className="mt-5 divide-y divide-line">
-                  {TAREAS.map((t) => (
-                    <li key={t}>
-                      <label className="flex cursor-pointer items-center gap-3 py-3">
-                        <input type="checkbox" checked={!!marcas[t]} onChange={() => alternar(t)} className="size-4 accent-[var(--brand)]" />
-                        <span className={marcas[t] ? "text-muted-foreground line-through" : ""}>{t}</span>
-                      </label>
-                    </li>
-                  ))}
+                  {TAREAS.map((t) => {
+                    const esNA = !!nas[t];
+                    const lista = coms[t] ?? [];
+                    return (
+                      <li key={t} className="py-2">
+                        <div className="flex items-center gap-3">
+                          <label className="flex flex-1 cursor-pointer items-center gap-3 py-1">
+                            <input type="checkbox" disabled={esNA} checked={!!marcas[t] && !esNA} onChange={() => alternar(t)} className="size-4 accent-[var(--brand)]" />
+                            <span className={esNA ? "text-muted-foreground italic" : marcas[t] ? "text-muted-foreground line-through" : ""}>{t}</span>
+                            {esNA && <span className="rounded bg-panel2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">No aplica</span>}
+                          </label>
+                          <button onClick={() => alternarNA(o.id, t)} className={`rounded-md border px-2 py-1 text-xs ${esNA ? "border-brand text-accent" : "border-line text-muted-foreground hover:border-brand"}`}>
+                            {esNA ? "Sí aplica" : "No aplica"}
+                          </button>
+                          <button onClick={() => { setAbierta(abierta === t ? null : t); setTexto(""); }} className="rounded-md border border-line px-2 py-1 text-xs text-muted-foreground hover:border-brand">
+                            Comentarios{lista.length ? ` (${lista.length})` : ""}
+                          </button>
+                        </div>
+                        {abierta === t && (
+                          <div className="ml-7 mt-2 space-y-2">
+                            {lista.map((c, i) => (
+                              <div key={i} className="rounded-md bg-panel2 px-3 py-2 text-sm">
+                                <span className="block text-[11px] text-muted-foreground">{new Date(c.fecha).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                {c.texto}
+                              </div>
+                            ))}
+                            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!texto.trim()) return; comentar(o.id, t, texto.trim()); setTexto(""); }}>
+                              <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Comentario de seguimiento…" className="flex-1 rounded-md border border-line bg-panel2 px-3 py-1.5 text-sm" />
+                              <button type="submit" className="rounded-md bg-brand px-3 py-1.5 text-sm font-semibold text-primary-foreground">Agregar</button>
+                            </form>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </>
             )}

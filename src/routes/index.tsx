@@ -684,7 +684,7 @@ function Index() {
                     <Link to="/checklist" search={{ id: o.id }} className="flex-1 text-sm hover:text-accent">
                       <span className="font-mono text-xs text-muted-foreground">{o.id}</span> · {faltan[0]}
                       <span className="block text-[11px] text-muted-foreground">
-                        {o.cliente} · {TAREAS.length - faltan.length}/{TAREAS.length} verificadas · {faltan.length} pendientes
+                        {o.cliente} · {checklist.aplicanDe(o.id).length - faltan.length}/{checklist.aplicanDe(o.id).length} verificadas · {faltan.length} pendientes
                       </span>
                     </Link>
                     <span className={`text-[11px] font-semibold uppercase tracking-wide ${d <= 0 ? "text-accent" : "text-muted-foreground"}`}>
