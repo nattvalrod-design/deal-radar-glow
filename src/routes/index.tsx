@@ -678,7 +678,7 @@ function Index() {
                   <div key={o.id} className="flex items-center gap-3 rounded-lg bg-panel2 px-4 py-3">
                     <button
                       title="Marcar como hecha"
-                      onClick={() => checklist.alternar(o.id, faltan[0])}
+                      onClick={() => checklist.alternar(o.id, faltan[0]!)}
                       className="size-4 shrink-0 rounded-full border-2 border-accent/30 hover:bg-accent/30"
                     ></button>
                     <Link to="/checklist" search={{ id: o.id }} className="flex-1 text-sm hover:text-accent">
