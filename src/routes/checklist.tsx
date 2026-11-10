@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { TAREAS, useChecklist } from "@/lib/checklist";
 import { useOfertas } from "@/lib/useOfertas";
-import { formatoFecha } from "@/lib/opportunities";
+import { diasRestantes, formatoFecha } from "@/lib/opportunities";
 
 export const Route = createFileRoute("/checklist")({
   validateSearch: (s: Record<string, unknown>) => ({ id: typeof s["id"] === "string" ? s["id"] : undefined }),
@@ -29,7 +29,7 @@ function Checklist() {
   const [rol, setRol] = useState<"vendedor" | "comercial" | "tecnico">("comercial");
   const [persona, setPersona] = useState("");
   const nombres = Array.from(new Set(oportunidades.map((x) => x[rol]))).sort();
-  const lista = oportunidades.filter((x) => !persona || x[rol] === persona);
+  const lista = oportunidades.filter((x) => !persona || x[rol] === persona).sort((a, b) => a.fechaCierre.localeCompare(b.fechaCierre));
 
   const seleccion = id ?? lista[0]?.id;
   const o = oportunidades.find((x) => x.id === seleccion);
@@ -54,7 +54,10 @@ function Checklist() {
           <h1 className="font-display text-2xl font-bold uppercase tracking-wide">
             Offer<span className="text-brand">Pulse</span> · Checklist
           </h1>
+          <div className="flex items-center gap-3">
+          <span className="rounded-md border border-line bg-panel px-3 py-2 text-sm capitalize text-muted-foreground">Hoy: {listo ? new Date().toLocaleDateString("es-ES", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) : ""}</span>
           <Link to="/" className="rounded-md border border-line bg-panel px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent hover:border-brand">← Pipeline</Link>
+          </div>
         </header>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -86,6 +89,7 @@ function Checklist() {
                         <span className={`text-xs font-semibold ${n === aplicanDe(x.id).length ? "text-go" : "text-muted-foreground"}`}>{n}/{cargado ? aplicanDe(x.id).length : TAREAS.length}</span>
                       </span>
                       <span className="block truncate">{x.nombre}</span>
+                      <span className={`block text-[11px] ${diasRestantes(x.fechaCierre) < 0 ? "text-stop" : diasRestantes(x.fechaCierre) <= 7 ? "text-warn" : "text-muted-foreground"}`}>Entrega {formatoFecha(x.fechaCierre)} · {diasRestantes(x.fechaCierre) < 0 ? `vencida hace ${-diasRestantes(x.fechaCierre)} d` : `faltan ${diasRestantes(x.fechaCierre)} d`}</span>
                     </button>
                   </li>
                 );
